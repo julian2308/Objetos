@@ -1,0 +1,1 @@
+id julian,nombres alv,apellidos av,teléfono 34321,nota final 4.1000004,género M
