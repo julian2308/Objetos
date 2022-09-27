@@ -6,15 +6,15 @@ public class Estudiante {
     private String nombres;
     private String apellidos;
     private String telefono;
-    private float nota;
+    private float [] notas;
     private char genero;
 
-    public Estudiante(String idEstudiante, String nombres, String apellidos, String telefono, float nota, char genero) {
+    public Estudiante(String idEstudiante, String nombres, String apellidos, String telefono, float []notas, char genero) {
         this.idEstudiante = idEstudiante;
         this.nombres = nombres;
         this.apellidos = apellidos;
         this.telefono = telefono;
-        this.nota = nota;
+        this.notas = notas;
         this.genero = genero;
     }
 
@@ -50,12 +50,12 @@ public class Estudiante {
         this.telefono = telefono;
     }
 
-    public float getNotaFinal() {
-        return this.nota;
+    public float[] getNotaFinal() {
+        return this.notas;
     }
 
-    public void setNotaFinal(float notaFinal) {
-        this.nota = notaFinal;
+    public void setNotaFinal(float[] notaFinal) {
+        this.notas = notaFinal;
     }
 
     public char getGenero() {
@@ -66,13 +66,25 @@ public class Estudiante {
         this.genero = genero;
     }
 
+    private float obtenerDefinitiva(){
+        float acumulador = 0;
+        for (int i = 0; i < this.notas.length; i++) {
+            if (i == 2){
+                acumulador+= this.notas[i] * 0.4;
+            } else {
+                acumulador+= this.notas[i]*0.3;
+            }
+        }
+        return acumulador;
+    }
+
     @Override
     public String toString() {
         return   this.idEstudiante + '/' +
                  this.nombres + '/' +
                  this.apellidos + '/' +
                  this.telefono + '/' +
-                 this.nota+ '/' +
+                 Arrays.toString(this.notas) + '/' +
                  this.genero;
     }
 

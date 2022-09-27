@@ -1,21 +1,25 @@
+package gestion;
+
+import negocio.Estudiante;
+
 import javax.swing.*;
 import java.io.*;
 import java.util.ArrayList;
 
 
-public class ManageStudents {
+public class GestorEstudiantes {
 
     private ArrayList<Estudiante> misEstudiantes;
     private String ruta;
 
-    public ManageStudents(String ruta) {
+    public GestorEstudiantes(String ruta) {
         this.misEstudiantes = new ArrayList();
         this.ruta = ruta;
     }
 
-    private float capturaNota(){
+    private float capturaNota(int corte){
 
-        float nota = Float.parseFloat(JOptionPane.showInputDialog(null, "Ingrese la nota del estudiante correspondiente al corte "));
+        float nota = Float.parseFloat(JOptionPane.showInputDialog(null, "Ingrese la nota del estudiante correspondiente al corte "+ corte));
 
         while(nota <= 0 || nota > 5){
             nota = Float.parseFloat(JOptionPane.showInputDialog(null, "Ingrese una nota entre 0 y 5 para que se válida"));
@@ -26,7 +30,7 @@ public class ManageStudents {
     }
     public void nuevoEstudiante(){
         String id, name, lastN, phone;
-        float grade;
+        float [] grades;
         char gender;
 
         id = JOptionPane.showInputDialog("Digite el código del estudiante: ");
@@ -40,7 +44,7 @@ public class ManageStudents {
         lastN = JOptionPane.showInputDialog("Digite los apellidos del estudiante: ");
         phone = JOptionPane.showInputDialog("Digite el teléfono del estudiante: ");
 
-        grade = this.capturaNota();
+        grades = this.obtenerNotas();
 
         gender = JOptionPane.showInputDialog("Digite el género del estudiante: ").charAt(0);
         while (gender != 'M' && gender != 'm' && gender != 'F' && gender != 'f'){
@@ -48,12 +52,21 @@ public class ManageStudents {
 
         }
 
-        Estudiante stud = new Estudiante(id, name, lastN, phone, grade, gender);
+        Estudiante stud = new Estudiante(id, name, lastN, phone, grades, gender);
         this.guardarEstudiante(stud);
         JOptionPane.showMessageDialog(null, "El estudiante con id " + id + " fue creado con éxito");
 
     }
 
+
+    private float[] obtenerNotas (){
+        float [] nuevasNotas = new float[3];
+        for (int i = 0; i < 3; i++) {
+            nuevasNotas[i] = this.capturaNota(i+1);
+        }
+
+        return nuevasNotas;
+    }
     public void buscarEstudiante(){
 
         String id;
@@ -63,7 +76,6 @@ public class ManageStudents {
 
         if (stud != null){
             System.out.println(stud.toString());
-            System.out.println("=======================");
         } else{
             JOptionPane.showMessageDialog(null, "Ese estudiante no existe");
         }
@@ -77,8 +89,6 @@ public class ManageStudents {
         for (Estudiante stud: estudiantes) {
             System.out.println(stud.toString());
         }
-
-        System.out.println("=======================");
 
 
     }
@@ -213,27 +223,23 @@ public class ManageStudents {
 
     public void modificarNotaFinal(){
         String id;
-        float nuevoDato;
-        ArrayList<Estudiante> estudiantes;
+        float [] nuevasNotas;
         id = JOptionPane.showInputDialog("Digite el código del estudiante: ");
-        Estudiante estudiante = this.devolverEstudiante(id);
-
         boolean existe = existeCodigo(id);
+        for(Estudiante stud: this.misEstudiantes){
+            if(stud.getIdEstudiante().equals(id)){
+                nuevasNotas = this.obtenerNotas();
+                stud.setNotaFinal(nuevasNotas);
+                JOptionPane.showMessageDialog(null, "La nota fue actualizada con éxito");
+                break;
+            }
+
+        }
+
         if (!existe) {
             JOptionPane.showMessageDialog(null, "Ese código no existe!!!");
         }
 
-        if (estudiante != null){
-            estudiantes = this.obtenerEstudiantes();
-            for (Estudiante stud: estudiantes){
-                if (stud.getIdEstudiante().equals(estudiante.getIdEstudiante())){
-                    nuevoDato = this.capturaNota();
-                    stud.setNotaFinal(nuevoDato);
-                    this.reemplazarArchivo(estudiantes);
-                    JOptionPane.showMessageDialog(null, "El estudiante ha sido modificado con éxito");
-                }
-            }
-        }
     }
 
     public void modificarGenero(){
@@ -283,8 +289,13 @@ public class ManageStudents {
             br = new BufferedReader(archivo);
             while((registro = br.readLine()) != null){
                 String[] campos = registro.split("/");
+                String[] notas = campos[4].split(",");
+                float[] notasNuevas = new float[3];
+                notasNuevas[0] = Float.parseFloat(notas[0].substring(1,4));
+                notasNuevas[1] = Float.parseFloat(notas[1].substring(1,4));
+                notasNuevas[2] = Float.parseFloat(notas[2].substring(1,4));
                 if(campos[0].equals(code)){
-                    stud = new Estudiante(campos[0], campos[1], campos[2], campos[3], Float.parseFloat(campos[4]), campos[5].charAt(0));
+                    stud = new Estudiante(campos[0], campos[1], campos[2], campos[3], notasNuevas, campos[5].charAt(0));
                     break;
                 }
             }
@@ -302,13 +313,17 @@ public class ManageStudents {
         FileReader archivo;
         BufferedReader br;
         String lineas;
-
         try{
             archivo = new FileReader(this.ruta);
             br = new BufferedReader(archivo);
             while((lineas = br.readLine()) != null){
                 String[] campos = lineas.split("/");
-                stud = new Estudiante(campos[0], campos[1], campos[2], campos[3], Float.parseFloat(campos[4]), campos[5].charAt(0));
+                String[] notas = campos[4].split(",");
+                float[] notasNuevas = new float[3];
+                notasNuevas[0] = Float.parseFloat(notas[0].substring(1,4));
+                notasNuevas[1] = Float.parseFloat(notas[1].substring(1,4));
+                notasNuevas[2] = Float.parseFloat(notas[2].substring(1,4));
+                stud = new Estudiante(campos[0], campos[1], campos[2], campos[3], notasNuevas, campos[5].charAt(0));
                 estudiantes.add(stud);
             }
         }
